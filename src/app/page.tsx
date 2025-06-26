@@ -19,7 +19,12 @@ export default function HomePage() {
     );
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!email || selected.length === 0) {
+      alert('Please enter a valid email and select at least one topic.');
+      return;
+    }
     await fetch('/api/subscribe', {
       method: 'POST',
       body: JSON.stringify({ email, topics: selected }),
@@ -29,12 +34,14 @@ export default function HomePage() {
 
   return (
     <main className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-4">
+      <form onSubmit={handleSubmit} className="w-full max-w-md space-y-4">
         <h1 className="text-2xl font-bold text-center">Subscribe</h1>
 
         <input
           type="email"
           placeholder="Your email"
+          required
+          autoFocus
           value={email}
           onChange={e => setEmail(e.target.value)}
           className="w-full border rounded px-4 py-2"
@@ -66,12 +73,13 @@ export default function HomePage() {
         )}
 
         <button
-          onClick={handleSubmit}
-          className="w-full bg-blue-600 text-white rounded px-4 py-2 hover:bg-blue-700"
+          type="submit"
+          disabled={!email || selected.length === 0}
+          className="w-full bg-blue-600 text-white rounded px-4 py-2 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
         >
           Subscribe
         </button>
-      </div>
+      </form>
     </main>
   );
 }
