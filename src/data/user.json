@@ -1,0 +1,33 @@
+[
+  {
+    "email": "shariar.hasan@topofstacksoftware.com",
+    "topics": [
+      "Backend",
+      "DevOps",
+      "AI",
+      "Design",
+      "QA",
+      "Fullstack"
+    ],
+    "isUnsubscribed": false
+  },
+  {
+    "email": "",
+    "topics": [
+      "Frontend",
+      "Backend",
+      "Fullstack",
+      "DevOps",
+      "AI",
+      "Design",
+      "QA",
+      "React",
+      "Next.js",
+      "Node.js",
+      "JavaScript",
+      "TypeScript",
+      "Java"
+    ],
+    "isUnsubscribed": false
+  }
+]
