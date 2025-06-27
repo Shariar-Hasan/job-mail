@@ -1,3 +1,4 @@
+import { ENV } from '@/constants/environments';
 import nodemailer from 'nodemailer';
 
 interface SendMailProps {
@@ -7,16 +8,16 @@ interface SendMailProps {
 }
 
 const transporter = nodemailer.createTransport({
-    service: process.env.MAIL_SERVICE,
+    service: ENV.MAIL_SERVICE,
     auth: {
-        user: process.env.MAIL_USER,
-        pass: process.env.MAIL_PASS,
+        user: ENV.MAIL_USER,
+        pass: ENV.MAIL_PASS,
     },
 });
 export default async function sendMail({ subject, email, html }: SendMailProps) {
     try {
         const response = await transporter.sendMail({
-            from: process.env.MAIL_USER,
+            from: `Job Mailer <${ENV.MAIL_USER}>`,
             to: email,
             subject,
             html,

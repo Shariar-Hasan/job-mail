@@ -1,12 +1,15 @@
 // /lib/DynamicMail.ts
 
+import { ENV } from "@/constants/environments";
+
 interface DynamicMailProps {
     title: string;
     subtitle: string;
     body: string;
+    email: string; // Optional, can be used for personalization
 }
 
-export const DynamicMail = ({ title, subtitle, body }: DynamicMailProps) => {
+export const DynamicMail = ({ title, subtitle, body, email }: DynamicMailProps) => {
     return `
   <!DOCTYPE html>
   <html lang="en">
@@ -22,7 +25,7 @@ export const DynamicMail = ({ title, subtitle, body }: DynamicMailProps) => {
       <div class="email-body">
         ${body}
       </div>
-      ${Footer()}
+      ${Footer({ email })}
     </div>
   </body>
   </html>
@@ -85,10 +88,11 @@ const Header = ({ title, subtitle }: { title: string; subtitle: string }) => {
     `;
 };
 
-const Footer = () => {
+const Footer = ({ email }: { email: string }) => {
     return `
       <div class="email-footer">
         <p>&copy; ${new Date().getFullYear()} Job Mailer. All rights reserved.</p>
+        <p>If you wish to unsubscribe, click <a href="${ENV.BASE_URL}/unsubscribe/${email}" style="color: #2563eb; text-decoration: none;">here</a>.</p>
         <p>
           <a href="https://linkedin.com/in/shariar-hasan" style="color: #2563eb; text-decoration: none; margin-right: 12px;">
             LinkedIn

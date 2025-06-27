@@ -2,22 +2,18 @@
   {
     "email": "shariar.hasan@topofstacksoftware.com",
     "topics": [
-      "Frontend",
-      "Backend",
-      "QA",
       "React",
       "Next.js",
       "Node.js",
       "JavaScript",
-      "TypeScript",
-      "1 Year Experience",
-      "Design"
+      "TypeScript"
     ],
-    "isUnsubscribed": false
-  },
-  {
-    "email": "",
-    "topics": [],
+    "stacks": [
+      "Frontend",
+      "Backend",
+      "Fullstack"
+    ],
+    "experience": "1 Year Experience",
     "isUnsubscribed": false
   }
 ]
