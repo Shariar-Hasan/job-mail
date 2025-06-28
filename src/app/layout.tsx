@@ -1,3 +1,4 @@
+import SiteWide from "@/components/Shared/SiteWide";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -25,8 +26,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gradient-to-br from-green-50 to-green-100`}
       >
+        <SiteWide />
         {children}
       </body>
     </html>

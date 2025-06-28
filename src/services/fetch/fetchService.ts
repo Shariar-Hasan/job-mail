@@ -18,7 +18,9 @@ class FetchService {
     }
 
     async request<T>(endpoint: string, options?: RequestInit): Promise<T> {
-        const res = await fetch(this.baseUrl + this.fixEndpoint(endpoint), options);
+        const finalEndpoint = this.baseUrl + this.fixEndpoint(endpoint);
+        console.log("Making request to:", finalEndpoint, "with options:", options);
+        const res = await fetch(finalEndpoint, options);
         if (!res.ok) throw new Error(await res.text());
         return res.json();
     }
@@ -28,6 +30,7 @@ class FetchService {
     }
 
     post<T, D = unknown>(endpoint: string, data: D): Promise<T> {
+        console.log("POST request to:", endpoint, "with data:", data);
         return this.request<T>(endpoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -48,10 +51,8 @@ class FetchService {
     }
 }
 
-const baseUrl =
-    typeof window === 'undefined'
-        ? ENV.BASE_URL || 'http://localhost:3000/api'
-        : ''
+const baseUrl = ENV.API_URL || 'http://localhost:3000/api';
+
 const api = new FetchService(baseUrl);
 export { api };
 

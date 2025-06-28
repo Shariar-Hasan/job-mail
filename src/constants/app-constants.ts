@@ -5,5 +5,6 @@ export const APP_CONSTANTS = {
     APP_AUTHOR: 'Shariar Hasan',
     APP_AUTHOR_EMAIL: 'shahriar.hasan.1523@gmail.com',
     APP_DESCRIPTION: 'A simple job mailer application to send job notifications via email.',
+    SUPPORT_EMAIL: 'shahriar.hasan.1523@gmail.com'
 
 };

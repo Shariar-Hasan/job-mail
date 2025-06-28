@@ -1,167 +1,173 @@
 "use client";
+import Button from "@/components/small/Button";
+import CheckboxGroup from "@/components/small/CheckboxGroup";
+import tryCatch from "@/lib/tryCatch";
+import { api } from "@/services/fetch/fetchService";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import toast from "react-hot-toast";
+
+interface Option {
+  label: string;
+  value: string;
+}
 
 interface FormValues {
   email: string;
   topics: string[];
+  stacks: string[];
+  experience: string;
 }
 
 export default function HomePage() {
-  const [topics, setTopics] = useState<string[]>([]);
-  const [success, setSuccess] = useState<string | null>(null);
+  const [topicOptions, setTopicOptions] = useState<Option[]>([]);
+  const [stackOptions, setStackOptions] = useState<Option[]>([]);
+  const [experienceOptions, setExperienceOptions] = useState<Option[]>([]);
+  const [load, setLoad] = useState({
+    fetching: true,
+    subscribing: false,
+  });
+
   const {
     control,
     handleSubmit,
     setValue,
-    watch,
-    formState: { errors, isSubmitting },
+    formState: { isDirty },
     reset,
   } = useForm<FormValues>({
-    defaultValues: { email: "", topics: [] },
+    defaultValues: { email: "", topics: [], stacks: [], experience: "" },
   });
 
-  const selected = watch("topics");
-
   useEffect(() => {
+    setLoad((prev) => ({ ...prev, fetching: true }));
     fetch("/api/subscription-configs")
       .then((res) => res.json())
       .then((data) => {
-        setTopics(data.topics || []);
-        setValue("topics", data.topics || []); // Select all by default
+        setTopicOptions((data.topics || []).map((t: string) => ({ label: t, value: t })));
+        setStackOptions((data.stacks || []).map((s: string) => ({ label: s, value: s })));
+        setExperienceOptions((data.experiences || []).map((e: string) => ({ label: e, value: e })));
+      }).finally(() => {
+        setLoad((prev) => ({ ...prev, fetching: false }));
       });
+
   }, [setValue]);
 
+
   const onSubmit = async (data: FormValues) => {
-    setSuccess(null);
-    const res = await fetch("/api/subscribe", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
+    toast.dismiss();
+    setLoad((prev) => ({ ...prev, subscribing: true }));
+    const { error } = await tryCatch(async () => {
+      return api.post("/api/subscribe", data);
     });
-    if (res.ok) {
-      setSuccess("Subscribed successfully!");
-      reset({ email: "", topics });
+    setLoad((prev) => ({ ...prev, subscribing: false }));
+    if (error) {
+      toast.error("Subscription failed. Please try again.");
     } else {
-      setSuccess("Subscription failed. Please try again.");
+      toast.success("Subscribed successfully!");
+      reset({ email: "", topics: [], stacks: [], experience: "" });
     }
   };
-
-  const allSelected = selected.length === topics.length;
-
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex flex-col items-center justify-center p-4">
+    <main className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 flex flex-col items-center justify-center p-2 md:p-4">
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="w-full max-w-lg bg-white rounded-xl shadow-lg p-8 space-y-6"
+        className="w-full max-w-2xl bg-white rounded-xl shadow-lg p-3 sm:p-4 md:p-6 lg:p-8 space-y-8"
       >
-        <h1 className="text-3xl font-bold text-center text-blue-700 mb-2">
-          Subscribe to Job Alerts
-        </h1>
-        <p className="text-center text-gray-500 mb-4">
-          Get the latest jobs delivered to your inbox.
-        </p>
+        <h1 className="text-3xl font-bold text-center text-green-700 mb-2">Subscribe to Job Alerts</h1>
+        <p className="text-center text-green-500 mb-4">Get the latest jobs delivered to your inbox.</p>
 
-        <div>
-          <label className="block text-gray-700 font-medium mb-1">Email</label>
-          <Controller
-            name="email"
-            control={control}
-            rules={{
-              required: "Email is required",
-              pattern: {
-                value: /.+@.+\..+/,
-                message: "Invalid email",
-              },
-            }}
-            render={({ field }) => (
+        {/* Email Field */}
+        <Controller
+          name="email"
+          control={control}
+          rules={{ required: "Email is required", pattern: { value: /.+@.+\..+/, message: "Invalid email" } }}
+          render={({ field, fieldState }) => (
+            <div>
+              <label className="block text-gray-700 font-bold mb-1">Email</label>
               <input
                 {...field}
                 type="email"
                 placeholder="Your email"
-                className={`w-full border px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 ${errors.email ? "border-red-500" : "border-gray-300"
-                  }`}
+                className={`w-full border px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-green-400 ${fieldState.error ? "border-red-500" : "border-gray-300"}`}
               />
-            )}
-          />
-          {errors.email && (
-            <p className="text-red-500 text-sm mt-1">
-              {errors.email.message}
-            </p>
+              {fieldState.error && <p className="text-red-500 text-sm mt-1">{fieldState.error.message}</p>}
+            </div>
           )}
-        </div>
+        />
 
-        <div>
-          <label className="block text-gray-700 font-medium mb-1">Topics</label>
-          <div className="flex items-center mb-2">
-            <input
-              type="checkbox"
-              checked={allSelected}
-              onChange={() =>
-                setValue("topics", allSelected ? [] : topics)
-              }
-              className="mr-2 accent-blue-600"
+        {/* Topics Field */}
+        <Controller
+          name="topics"
+          control={control}
+          rules={{ validate: (v) => v.length > 0 || "Select at least one topic" }}
+          render={({ field, fieldState }) => (
+            <CheckboxGroup
+              options={topicOptions}
+              value={field.value}
+              onChange={field.onChange}
+              label="Topics of Interest"
+              error={fieldState.error?.message}
+              optionClass={'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 '}
             />
-            <span className="text-sm">Select All</span>
-          </div>
-          <Controller
-            name="topics"
-            control={control}
-            rules={{
-              validate: (v) =>
-                v.length > 0 || "Select at least one topic",
-            }}
-            render={({ field }) => (
-              <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
-                {topics.map((topic) => (
-                  <label
-                    key={topic}
-                    className="flex items-center text-gray-700"
-                  >
-                    <input
-                      type="checkbox"
-                      value={topic}
-                      checked={field.value.includes(topic)}
-                      onChange={() =>
-                        field.value.includes(topic)
-                          ? field.onChange(
-                            field.value.filter((t: string) => t !== topic)
-                          )
-                          : field.onChange([...field.value, topic])
-                      }
-                      className="mr-2 accent-blue-600"
-                    />
-                    {topic}
-                  </label>
-                ))}
-              </div>
-            )}
-          />
-          {errors.topics && (
-            <p className="text-red-500 text-sm mt-1">
-              {errors.topics.message}
-            </p>
           )}
-        </div>
+        />
 
-        <button
+        {/* Stacks Field */}
+        <Controller
+          name="stacks"
+          control={control}
+          rules={{ validate: (v) => v.length > 0 || "Select at least one stack" }}
+          render={({ field, fieldState }) => (
+            <CheckboxGroup
+              options={stackOptions}
+              value={field.value}
+              onChange={field.onChange}
+              label="Stack Preferences"
+              error={fieldState.error?.message}
+              optionClass={'grid grid-cols-2 md:grid-cols-3  gap-2 '}
+            />
+          )}
+        />
+
+        {/* Experience Field */}
+        <Controller
+          name="experience"
+          control={control}
+          rules={{ required: "Select your experience" }}
+          render={({ field, fieldState }) => (
+            <div>
+              <label className="block text-gray-700 font-bold mb-1">Experience</label>
+              <select
+                {...field}
+                className={`w-full border px-4 py-2 rounded text-green-500 focus:outline-none focus:ring-2 focus:ring-green-400 ${fieldState.error ? "border-red-500" : "border-gray-300"}`}
+              >
+                <option value="" className="text-gray-900">Select experience</option>
+                {load.fetching ? (
+                  Array.from({ length: 8 }).map((_, index) => (
+                    <option key={index} className="bg-gray-300 animate-pulse text-gray-500">
+                      Loading...
+                    </option>
+                  ))
+                ) :
+                  experienceOptions.map((exp) => (
+                    <option key={exp.value} value={exp.value} className="text-gray-900">{exp.label}</option>
+                  ))}
+              </select>
+              {fieldState.error && <p className="text-red-500 text-sm mt-1">{fieldState.error.message}</p>}
+            </div>
+          )}
+        />
+
+        <Button
           type="submit"
-          disabled={isSubmitting}
-          className="w-full bg-blue-600 text-white rounded px-4 py-2 font-semibold hover:bg-blue-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
+          loading={load.subscribing}
+          loadingText="Subscribing..."
+          disabled={load.subscribing || !isDirty}
+          className="w-full bg-green-600 text-white rounded px-4 py-2 cursor-pointer font-semibold hover:bg-green-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
         >
-          {isSubmitting ? "Subscribing..." : "Subscribe"}
-        </button>
+          {load.subscribing ? "Subscribing..." : "Subscribe"}
+        </Button>
 
-        {success && (
-          <div
-            className={`text-center mt-2 text-lg font-medium ${success.includes("success")
-                ? "text-green-600"
-                : "text-red-600"
-              }`}
-          >
-            {success}
-          </div>
-        )}
       </form>
     </main>
   );

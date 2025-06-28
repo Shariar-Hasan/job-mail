@@ -2,18 +2,17 @@
   {
     "email": "shariar.hasan@topofstacksoftware.com",
     "topics": [
-      "React",
-      "Next.js",
-      "Node.js",
-      "JavaScript",
-      "TypeScript"
+      "Ruby on Rails"
     ],
     "stacks": [
+      "Data Science",
       "Frontend",
-      "Backend",
-      "Fullstack"
+      "Machine Learning",
+      "Web Development",
+      "Blockchain",
+      "Product Management"
     ],
-    "experience": "1 Year Experience",
+    "experience": "2 Years Experience",
     "isUnsubscribed": false
   }
 ]

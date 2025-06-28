@@ -1,20 +1,25 @@
+import { APP_CONSTANTS } from "@/constants/app-constants";
+import { ROUTES } from "@/constants/route";
 import tryCatch from "@/lib/tryCatch";
 import { api } from "@/services/fetch/fetchService";
+import Link from "next/link";
 
 interface Props {
     params: Promise<{ email: string }>;
 }
 
 const UnSubscribePage = async ({ params }: Props) => {
+    console.log("UnsubscribePage params:", decodeURIComponent((await params).email));
     const { data, error } = await tryCatch(async () => {
         const res = await api.post<{ message: string, success: boolean }>(
-            `/unsubscribe/${(await params).email}`,
-            {}
+            `/unsubscribe`,
+            {
+                email: decodeURIComponent((await params).email)
+            }
         );
         return res;
     });
     if (error) {
-        console.error("Unsubscribe error:", error);
         return (
             <div className="flex flex-col items-center justify-center min-h-screen bg-red-50 p-4">
                 <div className="bg-white rounded-xl shadow-lg p-8 max-w-md w-full text-center">
@@ -37,7 +42,7 @@ const UnSubscribePage = async ({ params }: Props) => {
                         </svg>
                         <h1 className="text-2xl font-bold mb-2 text-green-700">Unsubscribed Successfully</h1>
                         <p className="text-gray-700 mb-2">{data.message}</p>
-                        <p className="text-sm text-gray-400">If you change your mind, you can always subscribe again.</p>
+                        <p className="text-sm text-gray-400">If you change your mind, you can always <Link href={ROUTES.SUBSCRIBE()}>subscribe again</Link>.</p>
                     </>
                 ) : (
                     <>
@@ -47,7 +52,7 @@ const UnSubscribePage = async ({ params }: Props) => {
                         </svg>
                         <h1 className="text-2xl font-bold mb-2 text-red-700">Unsubscribe Failed</h1>
                         <p className="text-gray-700 mb-2">{data?.message}</p>
-                        <p className="text-sm text-gray-400">If you think this is a mistake, please contact support.</p>
+                        <p className="text-sm text-gray-400">If you think this is a mistake, please <Link href={ROUTES.MAILTO(APP_CONSTANTS.APP_AUTHOR_EMAIL)}>contact support</Link>.</p>
                     </>
                 )}
             </div>

@@ -7,7 +7,7 @@ export default async function getConfigs() {
     const stacksList = await stacks.find();
 
     return {
-        experience: experienceList,
+        experiences: experienceList,
         stacks: stacksList,
         topics: topicsList
     };
